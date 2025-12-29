@@ -6,7 +6,14 @@ def DDA(x0, y0, x1, y1):
     dx = x1 - x0
     dy = y1 - y0
     steps = max(abs(dx), abs(dy))
-    
+
+    # Avoid division by zero when both points are identical
+    if steps == 0:
+        glBegin(GL_POINTS)
+        glVertex2f(round(x0), round(y0))
+        glEnd()
+        return
+
     Xinc = dx / steps
     Yinc = dy / steps
     x = x0
@@ -22,7 +29,7 @@ def DDA(x0, y0, x1, y1):
 def draw():
     glClear(GL_COLOR_BUFFER_BIT)
     glColor3f(1, 0, 0)
-    DDA(50, 50, 200, 200)  # Example line
+    DDA(50, 50, 50, 400)  # Example line
     glFlush()
 
 glutInit()

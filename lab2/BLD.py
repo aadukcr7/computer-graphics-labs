@@ -43,7 +43,7 @@ def display():
     glClear(GL_COLOR_BUFFER_BIT)
     glColor3f(1.0, 1.0, 1.0)  # White color
 
-    x, y = bresenham(50, 300, 300, 100)
+    x, y = bresenham(50, 100, 300, 100)
 
     glBegin(GL_POINTS)  # Draw individual pixels
     for i in range(len(x)):
