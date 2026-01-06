@@ -1,2 +1,3 @@
 Computer graphics lab works 
-COMP 342
+
+comp 342
