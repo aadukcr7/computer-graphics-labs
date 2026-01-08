@@ -3,6 +3,8 @@ import sys
 from OpenGL.GL import *
 from OpenGL.GLU import *
 from OpenGL.GLUT import *
+# Explicitly import the bitmap font constant so Pylance recognizes it
+from OpenGL.GLUT import GLUT_BITMAP_HELVETICA_12
 
 xmin, ymin, xmax, ymax = -100, -100, 100, 100
 polygon = []
