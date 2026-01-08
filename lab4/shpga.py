@@ -1,9 +1,11 @@
+import sys
+
 from OpenGL.GL import *
 from OpenGL.GLU import *
 from OpenGL.GLUT import *
 
 xmin, ymin, xmax, ymax = -100, -100, 100, 100
-polygon = [(-150, -50), (50, 150), (150, 50), (0, -150)]
+polygon = []
 
 def draw_axes():
     glColor3f(0.6, 0.6, 0.6)
@@ -22,6 +24,12 @@ def draw_window():
     glVertex2f(xmax, ymax)
     glVertex2f(xmin, ymax)
     glEnd()
+
+
+def draw_text(x, y, text):
+    glRasterPos2f(x, y)
+    for ch in text:
+        glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12, ord(ch))
 
 def inside(p, edge):
     x, y = p
@@ -101,6 +109,10 @@ def display():
                 glVertex2f(p[0], p[1])
             glEnd()
 
+    # Legend
+    draw_text(-290, 280, "Red = input polygon | Green = clipped result")
+    draw_text(-290, 260, "Keys: i=input polygon, q=quit")
+
     glFlush()
 
 def get_polygon_input():
@@ -111,26 +123,49 @@ def get_polygon_input():
     print(f"Window Size: [{xmin}, {ymin}] to [{xmax}, {ymax}]")
     print(f"Window Width: {xmax - xmin}, Height: {ymax - ymin}")
     print("=" * 50)
-    
-    num_points = int(input("Enter number of polygon vertices: "))
+
+    raw_count = input("Enter number of polygon vertices: ").strip()
+    try:
+        num_points = int(raw_count)
+    except ValueError:
+        print("Invalid number entered; polygon unchanged.")
+        return
+
     poly = []
-    
     for i in range(num_points):
-        x = float(input(f"Enter x{i+1} coordinate: "))
-        y = float(input(f"Enter y{i+1} coordinate: "))
-        poly.append((x, y))
-    
-    polygon = tuple(poly)
+        while True:
+            try:
+                x = float(input(f"Enter x{i+1} coordinate: "))
+                y = float(input(f"Enter y{i+1} coordinate: "))
+                poly.append((x, y))
+                break
+            except ValueError:
+                print("Please enter numeric values for x and y.")
+
+    polygon = list(poly)
     print("\nPolygon clipping in progress...")
+
+
+def keyboard(key, x, y):
+    global polygon
+    if key in (b'q', b'Q', b'\x1b'):
+        sys.exit(0)
+    if key in (b'i', b'I'):
+        get_polygon_input()
+        glutPostRedisplay()
 
 def main():
     get_polygon_input()
-    glutInit()
+    glutInit(sys.argv)
     glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB)
     glutInitWindowSize(600, 600)
     glutCreateWindow(b"Sutherland Hodgman Polygon Clipping")
+    glClearColor(0, 0, 0, 1)
     gluOrtho2D(-300, 300, -300, 300)
     glutDisplayFunc(display)
+    glutKeyboardFunc(keyboard)
+    print("Press i to input a polygon, q to quit.")
     glutMainLoop()
 
-main()
+if __name__ == "__main__":
+    main()
