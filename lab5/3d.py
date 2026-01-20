@@ -1,6 +1,7 @@
 from OpenGL.GL import *
 from OpenGL.GLU import *
 from OpenGL.GLUT import *
+import math
 
 # Rotation angle (fixed at 90 degrees)
 angle = 90
@@ -97,6 +98,54 @@ def draw_colored_cube():
     
     glEnd()
 
+# Draw cube wireframe (for original/before state)
+def draw_wireframe_cube():
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE)
+    glLineWidth(2.0)
+    glColor3f(0.5, 0.5, 0.5)  # Gray wireframe
+    
+    glBegin(GL_QUADS)
+    
+    # Front face
+    glVertex3f(1, 1, 1)
+    glVertex3f(-1, 1, 1)
+    glVertex3f(-1, -1, 1)
+    glVertex3f(1, -1, 1)
+    
+    # Back face
+    glVertex3f(1, 1, -1)
+    glVertex3f(-1, 1, -1)
+    glVertex3f(-1, -1, -1)
+    glVertex3f(1, -1, -1)
+    
+    # Top face
+    glVertex3f(1, 1, 1)
+    glVertex3f(-1, 1, 1)
+    glVertex3f(-1, 1, -1)
+    glVertex3f(1, 1, -1)
+    
+    # Bottom face
+    glVertex3f(1, -1, 1)
+    glVertex3f(-1, -1, 1)
+    glVertex3f(-1, -1, -1)
+    glVertex3f(1, -1, -1)
+    
+    # Right face
+    glVertex3f(1, 1, 1)
+    glVertex3f(1, 1, -1)
+    glVertex3f(1, -1, -1)
+    glVertex3f(1, -1, 1)
+    
+    # Left face
+    glVertex3f(-1, 1, 1)
+    glVertex3f(-1, 1, -1)
+    glVertex3f(-1, -1, -1)
+    glVertex3f(-1, -1, 1)
+    
+    glEnd()
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL)
+    glLineWidth(1.0)
+
 # Display function
 def display():
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
@@ -107,19 +156,58 @@ def display():
 
     draw_axes()
 
-    # Apply selected transformation
+    # Draw BEFORE: Original cube as wireframe
+    glPushMatrix()
+    draw_wireframe_cube()
+    glPopMatrix()
+
+    # Draw AFTER: Transformed cube with colors
     glPushMatrix()
 
     if transform_mode == "translate":
-        glTranslatef(1.5, 0.5, 0)
+        # Translation matrix: move by (1.5, 0.5, 0)
+        translation_matrix = [
+            1, 0, 0, 0,
+            0, 1, 0, 0,
+            0, 0, 1, 0,
+            1.5, 0.5, 0, 1
+        ]
+        glMultMatrixf(translation_matrix)
 
     elif transform_mode == "rotate":
-        glRotatef(angle, 1, 1, 0)
+        # Rotation matrix: 90 degrees around axis (1, 1, 0)
+        # Normalize the axis
+        ax, ay, az = 1, 1, 0
+        length = math.sqrt(ax**2 + ay**2 + az**2)
+        ax, ay, az = ax/length, ay/length, az/length
+        
+        # Convert angle to radians
+        rad = math.radians(angle)
+        c = math.cos(rad)
+        s = math.sin(rad)
+        t = 1 - c
+        
+        # Rodrigues' rotation formula in matrix form
+        rotation_matrix = [
+            t*ax*ax + c,    t*ax*ay + s*az, t*ax*az - s*ay, 0,
+            t*ax*ay - s*az, t*ay*ay + c,    t*ay*az + s*ax, 0,
+            t*ax*az + s*ay, t*ay*az - s*ax, t*az*az + c,    0,
+            0,              0,              0,              1
+        ]
+        glMultMatrixf(rotation_matrix)
 
     elif transform_mode == "scale":
-        glScalef(1.2, 0.8, 1)
+        # Scaling matrix: scale by (1.2, 0.8, 1)
+        scaling_matrix = [
+            2, 0, 0, 0,
+            0, 1.8, 0, 0,
+            0, 0, 1, 0,
+            0, 0, 0, 1
+        ]
+        glMultMatrixf(scaling_matrix)
 
     elif transform_mode == "shear":
+        # Shearing matrix
         shear_matrix = [
             1, 0.4, 0, 0,
             0.4, 1, 0, 0,
