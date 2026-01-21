@@ -1,0 +1,1 @@
+print("thiss snippet from lab5/3d.py")
